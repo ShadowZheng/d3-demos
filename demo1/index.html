@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Demo1</title>
+  </head>
+  <body>
+    <p>
+      Andy Zheng
+    </p>
+    <p class="p1">Apple</p>
+    <p class="p1">Pear</p>
+    <p class="p1">Banana</p>
+    <p id="p2" class="p2">Apple</p>
+    <p class="p2">Pear</p>
+    <p class="p2">Banana</p>
+    <p class="p3">Apple</p>
+    <p class="p3">Pear</p>
+    <p class="p3">Banana</p>
+    <script src="../lib/d3.js"></script>
+    <script type="text/javascript">
+      /* d3中的选择器重要分为：
+        d3.select() 选择所有指定元素的第一个
+        d3.selectAll() 选择指定元素全部
+       */
+      var p = d3.select('body')
+                .selectAll('p')
+                .text('Molly Yao');
+      p.style('color', 'red')
+       .style('font-size', '24px');
+
+       /* d3可以给DOM绑定数据
+          datum():绑定一个数据到选择集上
+          data():绑定一个数组到选择集上
+        */
+       var str = 'China';
+       var p1 = d3.selectAll('.p1');
+       p1.datum(str);
+       p1.text(function(d, i) {
+         return '第 ' + i + ' 个元素绑定的数据是 ' + d; 
+       });
+
+       var dataset = ["I like dogs","I like cats","I like snakes"];
+       var p2 = d3.selectAll('.p2');
+       p2.data(dataset)
+         .text(function(d, i) {
+            return d;
+         });
+
+         /* 操作元素：
+            append:在尾部追加元素
+            insert：在前面追加元素
+            remove() 删除元素
+          */
+        var body = d3.select('body');
+        body.append('p')
+            .text('append p element');
+        body.insert('p', '#p2')
+            .text('insert p element');
+
+        var svgset = [250,210,170,130,90];
+        var svg = body.append('svg')
+                      .attr('width', 300)
+                      .attr('height', 300);
+        // svg.selectAll('rect')
+    </script>
+  </body>
+</html>
