@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>饼图</title>
+    <style>
+    
+    </style>
+  </head>
+  <body>
+    <script src="../lib/d3.js"></script>
+    <script type="text/javascript">
+      // 画布大小
+      var width = 400;
+      var height = 400;
+      // 在body添加一个svg画布
+      var svg = d3.select('body')
+                  .append('svg')
+                  .attr('width', width)
+                  .attr('height', height);
+
+      // 布局不是要直接绘图，而是为了得到绘图所需的数据
+      var dataset = [30,10,43,55,13];
+      // 定义一个布局
+      var pie = d3.layout.pie();
+      var piedata = pie(dataset); // 转换数据
+
+      var outerRadius = 150; // 外半径
+      var innerRadius = 0; // 内半径
+      // 颜色比例尺
+      var color = d3.scale.category10();
+      // 生成一个弧生成器并设置内外半径
+      var arc = d3.svg.arc() // 弧生成器
+                      .innerRadius(innerRadius)
+                      .outerRadius(outerRadius);
+      var arcs = svg.selectAll('g')
+                    .data(piedata)
+                    .enter()
+                    .append('g')
+                    .attr('transform', 'translate(' + (width/2) + ', ' + (height/2) + ')');
+      arcs.append('path')
+          .attr('fill', function(d, i) {
+              return color(i);
+          })
+          .attr('d', function(d) {
+              return arc(d);
+          });
+      // 添加文本
+      arcs.append('text')
+          .attr('transform', function(d) {
+              return 'translate(' + arc.centroid(d) + ')';
+          })
+          .attr('text-anchor', 'middle')
+          .text(function(d) {
+              return d.data;
+          })
+    </script>
+    
+  </body>
+</html>

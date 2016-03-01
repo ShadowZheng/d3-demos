@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Update、Enter、Exit区别</title>
+  </head>
+  <body>
+    <p>1</p>
+    <p>2</p>
+    <script src="../lib/d3.js"></script>
+    <script type="text/javascript">
+      /* 当绑定数据数量 > 对应元素个数 enter模式，元素都是d3补齐的 */
+      var dataset = [3,6,9,12,15];
+      var p = d3.select('body').selectAll('p');
+      // 获取update部分
+      var update = p.data(dataset);
+      // 获取enter部分
+      var enter = update.enter();
+      update.text(function(d) {
+        return 'update ' + d;
+      });
+      enter.append('p')
+           .text(function(d) {
+              return "enter " + d;
+           });
+
+      /* 当绑定数据数量 < 对应元素个数 exit模式, 没有绑定上数据的元素就是exit元素 */
+    </script>
+    
+  </body>
+</html>

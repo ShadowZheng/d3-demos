@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>一个动态完成的柱形图</title>
+    <style>
+      
+    </style>
+  </head>
+  <body>
+    <script src="../lib/d3.js"></script>
+    <script type="text/javascript">
+      var w = 1000;
+      var h = 1000;
+      var svg = d3.select('body').append('svg')
+                  .attr('width', w)
+                  .attr('height', h)
+                  .append('g')
+                  .attr('transform', 'translate(0, 0)');
+      // 投影函数 GeoJson中地图数据都是三维的，要在网页上显示二维，需要投影函数
+      var projection = d3.geo.mercator()
+                             .center([107, 31]) // 设置地图中心位置
+                             .scale(850) // 设置放大比例
+                             .translate([w/2, h/2]); // 设置偏移量
+      // 需要地理路径生成器 来根据地理数据生成svg
+      var path = d3.geo.path().projection(projection);
+      // 颜色比例尺
+      var color = d3.scale.category20();
+      // 请求数据，绘制地图
+      d3.json('china.geojson', function(error, root) {
+        if (error) {
+          return console.error(error);
+        }
+        console.log(root.features);
+        svg.selectAll('path')
+           .data(root.features)
+           .enter()
+           .append('path')
+           .attr('stroke', '#000')
+           .attr('stroke-width', 1)
+           .attr('fill', function(d, i) {
+              return color(i);
+           })
+           .attr('d', path)
+           .on('mouseover', function(d, i) {
+              d3.select(this).attr('fill', 'yellow');
+           })
+           .on('mouseout', function(d, i) {
+              d3.select(this).attr('fill', color(i));
+           })
+      })
+    </script>
+    
+  </body>
+</html>

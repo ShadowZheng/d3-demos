@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>过渡</title>
+  </head>
+  <body>
+    <script src="../lib/d3.js"></script>
+    <script type="text/javascript">
+      /* 过渡的API 
+        .transition() 表示启动过渡效果
+        .duration() 过渡持续时间
+        .ease() 过渡的方式
+          - linear 线性过渡
+          - circle 慢慢到达最终状态
+          - elastic 弹跳的到达最终状态
+          - bounce 在最终状态处弹跳几次
+        .delay() 延迟多少毫秒后开始过渡
+      */
+      // 生成画布
+      var w = 400;
+      var h = 400;
+      var svg = d3.select('body')
+                  .append('svg')
+                  .attr('width', w)
+                  .attr('height', h);
+      var c1 = svg.append('circle')
+                  .attr('cx', 100)
+                  .attr('cy', 100)
+                  .attr('r', 45)
+                  .style('fill', 'green')
+                  .transition()
+                  .duration(1000)
+                  .attr('cx', 300);
+      var c2 = svg.append('circle')
+                  .attr('cx', 100)
+                  .attr('cy', 200)
+                  .attr('r', 45)
+                  .style('fill', 'green')
+                  .transition()
+                  .duration(1500)
+                  .attr('cx', 300)
+                  .style('fill', 'red');
+      var c3 = svg.append('circle')
+                  .attr('cx', 100)
+                  .attr('cy', 300)
+                  .attr('r', 45)
+                  .style('fill', 'green')
+                  .transition()
+                  .duration(2000)
+                  .attr('cx', 300)
+                  .style('fill', 'red')
+                  .attr('r', 25);
+
+    </script>
+    
+  </body>
+</html>
