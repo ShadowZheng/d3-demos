@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>方形分区图</title>
+    <style>
+      .node_text {
+        font-size: 10px;
+        text-anchor: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="../lib/d3.js"></script>
+    <script type="text/javascript">
+      var w = 600;
+      var h = 400;
+      // 颜色比例尺
+      var color = d3.scale.category20();
+      // 画布
+      var svg = d3.select('body').append('svg')
+                  .attr('width', w)
+                  .attr('height', h)
+                  .append('g');
+      // 分区图布局（转换数据）
+      var partition = d3.layout.partition()
+                               .sort(null) // 设置内部定点排序函数，null表示不排序
+                               .size([w, h]) // 设置转换后图形的范围
+                               .value(function(d) { return 1; }); // 设定表示分区大小的值
+      // 读取数据 并转换数据
+      d3.json('data.json', function(error, root) {
+        if (error) {
+          console.log(error);
+        }
+        console.log(root);
+        // 转换数据
+        var nodes = partition.nodes(root);
+        var links = partition.links(nodes);
+
+        // 绘制图形
+        var rects = svg.selectAll('g')
+                       .data(nodes)
+                       .enter().append('g');
+        rects.append('rect')
+          .attr('x', function(d) { return d.x; })
+          .attr('y', function(d) { return d.y; })
+          .attr('width', function(d) { return d.dx; })
+          .attr('height', function(d) { return d.dy; })
+          .style('stroke', '#fff')
+          .style('fill', function(d) {
+            return color((d.children ? d : d.parent).name);
+          })
+          .on('mouseover', function(d) {
+            d3.select(this).style('fill', 'yellow');
+          })
+          .on('mouseout', function(d) {
+            d3.select(this).transition()
+              .duration(200)
+              .style('fill', function(d) {
+                return color((d.children ? d : d.parent).name);
+              })
+          });
+
+        rects.append('text')
+          .attr('class', 'node_text')
+          .attr('transform', function(d, i) {
+            return 'translate(' + (d.x + 20) + ',' + (d.y + 20) + ')';
+          })
+          .text(function(d, i) {
+            return d.name;
+          })
+      })
+    </script>
+    
+  </body>
+</html>

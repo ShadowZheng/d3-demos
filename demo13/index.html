@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>仙剑奇侠传四人物关系图</title>
+    <style>
+      .labeltext {
+        font-size: 16px ;
+        font-family: SimSun;
+        fill:#000000;
+      }
+
+      .nodetext {
+        font-size: 12px ;
+        font-family: SimSun;
+        fill:#000000;
+      }
+
+      .linetext {
+        font-size: 12px ;
+        font-family: SimSun;
+        fill:#0000FF;
+        fill-opacity:0.0;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="../lib/d3.js"></script>
+    <script type="text/javascript">
+      var w = 600;
+      var h = 600;
+      var img_w = 77;
+      var img_h = 90;
+      // 创建画布
+      var svg = d3.select('body').append('svg')
+                  .attr('width', w)
+                  .attr('height', h);
+
+      // 读取数据
+      d3.json('data.json', function(error, root) {
+          if (error) {
+              return console.log(error );
+          }
+          console.log(root);
+          // 力学导图布局转换数据
+          var force = d3.layout.force()
+                        .nodes(root.nodes)
+                        .links(root.edges)
+                        .size([w, h])
+                        .linkDistance(200)
+                        .charge(-1500)
+                        .start();
+          var label_text_1 = svg.append('text')
+                                .attr('class', 'labeltext')
+                                .attr('x', 10)
+                                .attr('y', 16)
+                                .text('运动状态：开始');
+          var label_text_2 = svg.append('text')
+                                .attr('class', 'labeltext')
+                                .attr('x', 10)
+                                .attr('y', 40)
+                                .text('拖拽状态：结束');
+          // 生成连接线
+          var edges_line = svg.selectAll('line')
+                              .data(root.edges)
+                              .enter()
+                              .append('line')
+                              .style('stroke', '#ccc')
+                              .style('stroke-width', 1);
+          // 连接线文字
+          var edges_text = svg.selectAll('.linetext')
+                              .data(root.edges)
+                              .enter()
+                              .append('text')
+                              .attr('class', 'linetext')
+                              .text(function(d) {
+                                  return d.relation;
+                              });
+          // 定义拖拽对象
+          var drag = force.drag()
+                          .on('dragstart', function(d, i) {
+                            d.fixed = true;
+                            label_text_2.text('拖拽状态：开始');
+                          })
+                          .on('dragend', function(d, i) {
+                            label_text_2.text('拖拽状态：结束');
+                          })
+                          .on('drag', function(d, i) {
+                            label_text_2.text('拖拽状态：进行中');
+                          });
+          // 节点图片
+          var nodes_img = svg.selectAll('image')
+                             .data(root.nodes)
+                             .enter()
+                             .append('image')
+                             .attr('width', img_w)
+                             .attr('height', img_h)
+                             .attr('xlink:href', function(d) {
+                                return d.image;
+                             })
+                             .on('mouseover', function(d, i) {
+                                edges_text.style('fill-opacity', function(edge) {
+                                    if (edge.source === d || edge.target === d) {
+                                      return 1.0;
+                                    }
+                                });
+                             })
+                             .on('mouseout', function(d, i) {
+                                edges_text.style('fill-opacity', function(edge) {
+                                  if (edge.source === d || edge.target === d) {
+                                    return 0.0;
+                                  }
+                                });
+                             })
+                             .call(drag);
+          var text_dx = -20;
+          var text_dy = 20;
+          // 节点文字
+          var nodes_text = svg.selectAll('.nodetext')
+                              .data(root.nodes)
+                              .enter()
+                              .append('text')
+                              .attr('class', 'nodetext')
+                              .attr('dx', text_dx)
+                              .attr('dy', text_dy)
+                              .text(function(d) {
+                                  return d.name;
+                              });
+          // 力学运动开始
+          force.on('start', function() {
+            label_text_1.text('运动状态：开始');
+          });
+          // 力学运动结束
+          force.on('end', function() {
+            label_text_1.text('运动状态：结束');
+          })
+          // 布局重绘
+          force.on('tick', function() {
+            // 修改标签文字
+            label_text_1.text('运动状态：进行中');
+            // 限制节点的边界
+            root.nodes.forEach(function(d, i) {
+              d.x = d.x - img_w/2 < 0 ? img_w/2 : d.x;
+              d.x = d.x + img_w/2 > w ? w - img_w/2 : d.x;
+              d.y = d.y - img_h/2 < 0 ? img_h/2 : d.y;
+              d.y = d.y + img_h/2 + text_dy > h ? h - img_h/2 - text_dy : d.y;
+            });
+
+            // 更新连接线位置
+            edges_line.attr('x1', function(d) { return d.source.x; });
+            edges_line.attr('y1', function(d) { return d.source.y; });
+            edges_line.attr('x2', function(d) { return d.target.x; });
+            edges_line.attr('y2', function(d) { return d.target.y; });
+            // 更新连接线上文字位置
+            edges_text.attr('x', function(d) { return (d.source.x + d.target.x) / 2; });
+            edges_text.attr('y', function(d) { return (d.source.y + d.target.y) / 2; });
+            // 更新节点图片和文字
+            nodes_img.attr('x', function(d) { return d.x - img_w/2; });
+            nodes_img.attr('y', function(d) { return d.y - img_h/2; });
+            nodes_text.attr('x', function(d) { return d.x; });
+            nodes_text.attr('y', function(d) { return d.y + img_w/2; });
+          })
+      });
+    </script>
+    
+  </body>
+</html>

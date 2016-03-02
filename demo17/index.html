@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>拖拽</title>
+    <style>
+     
+    </style>
+  </head>
+  <body>
+    <script src="../lib/d3.js"></script>
+    <script type="text/javascript">
+      var w = 400;
+      var h = 400;
+      var circles = [
+        {cx: 150, cy: 200, r: 30},
+        {cx: 250, cy: 200, r: 30}
+      ];
+      var svg = d3.select('body').append('svg')
+        .attr('width', w)
+        .attr('height', h);
+      var drag = d3.behavior.drag().on('drag', function(d) {
+        d3.select(this)
+          .attr('cx', d.cx = d3.event.x)
+          .attr('cy', d.cy = d3.event.y);
+      });
+      svg.selectAll('circle')
+        .data(circles)
+        .enter()
+        .append('circle')
+        .attr('cx', function(d) { return d.cx; })
+        .attr('cy', function(d) { return d.cy; })
+        .attr('r', function(d) { return d.r; })
+        .attr('fill', 'black')
+        .call(drag);
+    </script>
+    
+  </body>
+</html>

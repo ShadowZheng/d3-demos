@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>圆形分区图</title>
+    <style>
+     
+    </style>
+  </head>
+  <body>
+    <script src="../lib/d3.js"></script>
+    <script type="text/javascript">
+      var w = 450;
+      var h = 450;
+      var radius = Math.min(w, h) / 2;
+      // 颜色比例尺
+      var color = d3.scale.category20();
+      // 画布
+      var svg = d3.select('body').append('svg')
+                  .attr('width', w)
+                  .attr('height', h)
+                  .append('g')
+                  .attr('transform', 'translate(' + radius + ',' + radius + ')');
+      // 分区图布局（转换数据）
+      var partition = d3.layout.partition()
+                               .sort(null) // 设置内部定点排序函数，null表示不排序
+                               .size([2 * Math.PI, radius * radius]) // 设置转换后图形的范围
+                               .value(function(d) { return 1; }); // 设定表示分区大小的值
+      // 定义绘制弧形的函数
+      var arc = d3.svg.arc()
+                      .startAngle(function(d) { return d.x; })
+                      .endAngle(function(d) { return d.x + d.dx})
+                      .innerRadius(function(d) { return Math.sqrt(d.y); })
+                      .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); })
+      // 读取数据 并转换数据
+      d3.json('data.json', function(error, root) {
+        if (error) {
+          console.log(error);
+        }
+        console.log(root);
+        // 转换数据
+        var nodes = partition.nodes(root);
+        var links = partition.links(nodes);
+
+        // 绘制图形
+        var arcs = svg.selectAll('g')
+                      .data(nodes)
+                      .enter().append('g');
+        arcs.append('path')
+          .attr('display', function(d) { return d.depth ? null : 'none'; })
+          .attr('d', arc)
+          .style('stroke', '#fff')
+          .style('fill', function(d) {
+            return color((d.children ? d : d.parent).name);
+          })
+          .on('mouseover', function(d) {
+            d3.select(this).style('fill', 'yellow');
+          })
+          .on('mouseout', function(d) {
+            d3.select(this)
+              .transition()
+              .duration(200)
+              .style('fill', function(d) {
+                return color((d.children ? d : d.parent).name);
+              });
+          });
+
+          arcs.append('text')
+            .style('font-size', '12px')
+            .style('font-family', 'simsun')
+            .attr('text-anchor', 'middle')
+            .attr('transform', function(d, i) {
+              // 第一个元素，只平移不旋转
+              if (i === 0) {
+                return 'translate(' + arc.centroid(d) + ')';
+              };
+              // 其他元素即平移也旋转
+              var r = 0;
+              if ((d.x + d.dx/2) / Math.PI * 180 < 180) {
+                r = 180 * ((d.x + d.dx/2 - Math.PI / 2) / Math.PI);
+              } else {
+                r = 180 * ((d.x + d.dx/2 + Math.PI / 2)/ Math.PI);
+              }
+              return 'translate(' + arc.centroid(d) + ')' + 'rotate(' + r + ')';
+            })
+            .text(function(d) { return d.name; });
+      })
+    </script>
+    
+  </body>
+</html>
